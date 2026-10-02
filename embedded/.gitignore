@@ -1,0 +1,16 @@
+# PlatformIO / build
+.pio/
+.pioenvs/
+.piolibdeps/
+
+# ESP-IDF
+build/
+sdkconfig
+sdkconfig.old
+sdkconfig.*
+managed_components/
+dependencies.lock
+
+# Sistema / editor
+.DS_Store
+*.swp
