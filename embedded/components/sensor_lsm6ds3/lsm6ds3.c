@@ -58,14 +58,12 @@ esp_err_t lsm6ds3_init(i2c_master_dev_handle_t dev) {
     return err;
   }
 
-  err = lsm6ds3_write_reg(dev, LSM6DS3_REG_CTRL1_XL,
-                          LSM6DS3_CTRL1_XL_2G_104HZ);
+  err = lsm6ds3_write_reg(dev, LSM6DS3_REG_CTRL1_XL, LSM6DS3_CTRL1_XL);
   if (err != ESP_OK) {
     return err;
   }
 
-  return lsm6ds3_write_reg(dev, LSM6DS3_REG_CTRL2_G,
-                           LSM6DS3_CTRL2_G_245DPS_104HZ);
+  return lsm6ds3_write_reg(dev, LSM6DS3_REG_CTRL2_G, LSM6DS3_CTRL2_G);
 }
 
 esp_err_t lsm6ds3_read_accel_raw(i2c_master_dev_handle_t dev,
