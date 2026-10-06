@@ -1,13 +1,17 @@
 #include "lsm6ds3.h"
 
-/* Tempo máximo (ms) de cada transação I2C. -1 usa o timeout padrão do driver. */
-#define LSM6DS3_I2C_TIMEOUT_MS (-1)
+#include "esp_log.h"
+
+#define LSM6DS3_I2C_TIMEOUT_MS 100
+
+static const char *TAG = "lsm6ds3";
 
 /** Escreve um único registrador. */
-static esp_err_t lsm6ds3_write_reg(i2c_master_dev_handle_t dev, uint8_t reg,
-                                   uint8_t value) {
+esp_err_t lsm6ds3_write_reg(i2c_master_dev_handle_t dev, uint8_t reg,
+                            uint8_t value) {
   uint8_t buffer[2] = {reg, value};
-  return i2c_master_transmit(dev, buffer, sizeof(buffer), LSM6DS3_I2C_TIMEOUT_MS);
+  return i2c_master_transmit(dev, buffer, sizeof(buffer),
+                             LSM6DS3_I2C_TIMEOUT_MS);
 }
 
 /** Lê @p len bytes a partir do registrador @p reg (write-read transaction). */
@@ -40,16 +44,22 @@ esp_err_t lsm6ds3_init(i2c_master_dev_handle_t dev) {
   if (err != ESP_OK) {
     return err;
   }
-  if (who_am_i != LSM6DS3_WHO_AM_I_VAL) {
+  if (who_am_i != LSM6DS3_WHO_AM_I_LSM6DS3 &&
+      who_am_i != LSM6DS3_WHO_AM_I_LSM6DS3TRC) {
+    ESP_LOGE(TAG, "WHO_AM_I inesperado: 0x%02X (esperado 0x69 ou 0x6A)",
+             who_am_i);
     return ESP_FAIL;
   }
+  ESP_LOGI(TAG, "WHO_AM_I = 0x%02X (%s)", who_am_i,
+           who_am_i == LSM6DS3_WHO_AM_I_LSM6DS3 ? "LSM6DS3" : "LSM6DS3TR-C");
 
   err = lsm6ds3_write_reg(dev, LSM6DS3_REG_CTRL3_C, LSM6DS3_CTRL3_C_BDU_IFINC);
   if (err != ESP_OK) {
     return err;
   }
 
-  err = lsm6ds3_write_reg(dev, LSM6DS3_REG_CTRL1_XL, LSM6DS3_CTRL1_XL_2G_104HZ);
+  err = lsm6ds3_write_reg(dev, LSM6DS3_REG_CTRL1_XL,
+                          LSM6DS3_CTRL1_XL_2G_104HZ);
   if (err != ESP_OK) {
     return err;
   }
